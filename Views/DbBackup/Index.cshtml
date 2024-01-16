@@ -1,0 +1,178 @@
+﻿@model List<BackupDBWeb.Models.DatabaseSelectionModel>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backup and Upload Databases</title>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            color: #343a40;
+        }
+
+        header {
+            background-color: #007bff;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+        }
+
+        table {
+            width: 80%;
+            margin: 20px auto;
+            background-color: #fff;
+            border-collapse: collapse;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+            border-right: 1px solid #dee2e6;
+        }
+
+        th {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+        }
+
+        .styled-checkbox {
+            margin-right: 10px;
+        }
+
+            .styled-checkbox input {
+                opacity: 0;
+                cursor: pointer;
+            }
+
+        .checkmark {
+            position: relative;
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+        }
+
+        .styled-checkbox input:checked ~ .checkmark:after {
+            content: "";
+            position: absolute;
+            left: 7px;
+            top: 3px;
+            width: 5px;
+            height: 10px;
+            border: solid #007bff;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        button {
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+            button:hover {
+                background-color: #218838;
+            }
+
+        .text-danger {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+
+   
+
+    @using (Html.BeginForm("BackupAndUpload", "DbBackup", FormMethod.Post))
+    {
+        <div>
+            <header>
+                <h1>Backup and Upload Databases</h1>
+            </header>
+            <h2>Database Names</h2>
+            <table>
+               @* <thead>
+                    <tr>
+                        <th>Database Name</th>
+                        <th>Database Name</th>
+                        <th>Database Name</th>
+                    </tr>
+                </thead>*@
+                <tbody>
+                    
+                    @for (int i = 0; i < Model.Count; i += 3)
+                    {
+                        <tr>
+                            @for (int j = i; j < i + 3 && j < Model.Count; j++)
+                            {
+                                <td>
+                                    <label class="checkbox-label">
+                                        @Html.HiddenFor(m => Model[j].DatabaseNames)
+                                        <span class="styled-checkbox">
+                                            @Html.CheckBoxFor(m => Model[j].IsDatabaseSelected, new { @class = "hidden-checkbox" })
+                                            <span class="checkmark"></span>
+                                        </span>
+                                        @Model[j].DatabaseNames
+                                    </label>
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <div class="button-container">
+            <button type="submit">Backup and Upload Selected Databases</button>
+                <button type="submit" style="background-color:red" asp-action="DeleteAllBackups" onclick="confirmAndDelete()">Delete All Backups</button>
+            
+            </div>
+            <div>
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            </div>
+        </div>
+    }
+
+
+
+
+
+    <script>
+        // Function to show success message when all records are deleted
+        function showSuccessMessage() {
+            alert("All records deleted from the drive successfully!");
+        }
+
+        // Function to confirm and perform the delete action
+        function confirmAndDelete() {
+            // Show the confirmation dialog
+            if (confirm('Are you sure you want to delete all backups?')) {
+                // If confirmed, submit the form
+                document.querySelector('form').submit();
+                // Show the success message
+                showSuccessMessage();
+            }
+        }
+    </script>
+
+</body>
+</html>

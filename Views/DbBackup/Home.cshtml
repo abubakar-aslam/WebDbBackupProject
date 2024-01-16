@@ -1,0 +1,155 @@
+﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+@model List<BackupDBWeb.Models.DatabaseSelectionModel>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Backups</title>
+    <style>
+        body {
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            overflow-x: hidden; /* Disable horizontal scrolling */
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+        }
+
+        table {
+            width: 100%; /* Make the table take up the full width of the viewport */
+            margin: 20px 0;
+            background-color: #fff;
+            border-collapse: collapse;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            border-right: 1px solid #ddd;
+        }
+
+        th {
+            background-color: white;
+            color: black;
+            border-bottom: 1px solid #ddd;
+            border-right: 1px solid #ddd;
+        }
+
+
+        .copy-button {
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        #copy-all-button {
+            background-color: #008CBA;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Upload Backups</h1>
+    </header>
+
+    <div style="overflow-x: auto;">
+        <!-- Enable horizontal scrolling for smaller screens -->
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Database Name</th>
+                    <th>Backup URL</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var database in Model)
+                {
+                    <tr>
+                        <td>@database.DatabaseNames</td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(HttpContextAccessor.HttpContext.Session.GetString($"{database.DatabaseNames}_Url")) &&
+                           HttpContextAccessor.HttpContext.Session.GetString($"{database.DatabaseNames}_Url") != "No backup available")
+                            {
+                                <a href="@HttpContextAccessor.HttpContext.Session.GetString($"{database.DatabaseNames}_Url")" target="_blank">URL</a>
+                            }
+                            else
+                            {
+                                <span>No backup available</span>
+                            }
+                        </td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(HttpContextAccessor.HttpContext.Session.GetString($"{database.DatabaseNames}_Url")) &&
+                           HttpContextAccessor.HttpContext.Session.GetString($"{database.DatabaseNames}_Url") != "No backup available")
+                            {
+                                <button class="copy-button" data-url="@HttpContextAccessor.HttpContext.Session.GetString($"{database.DatabaseNames}_Url")">Copy URL</button>
+                            }
+                            else
+                            {
+                                <!-- You can add any placeholder content or leave it empty if no backup available -->
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <button id="copy-all-button">Copy All URLs</button>
+    <br>
+
+    <div>
+        @if (TempData["TempDb"] != null && TempData["TempDb"].ToString() == "tempdb")
+        {
+            <h2 style="color:red">Tempdb backup can't be possible</h2>
+        }
+    </div>
+    <script>
+        document.addEventListener('click', function (e) {
+            if (e.target && e.target.className == 'copy-button') {
+                var urlToCopy = e.target.getAttribute('data-url');
+                copyToClipboard(urlToCopy);
+            }
+
+            if (e.target && e.target.id == 'copy-all-button') {
+                copyAllUrls();
+            }
+        });
+        function copyToClipboard(text) {
+            var dummy = document.createElement("textarea");
+            document.body.appendChild(dummy);
+            dummy.value = text;
+            dummy.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummy);
+            alert("URL copied to clipboard!");
+        }
+        function copyAllUrls() {
+            var allButtons = document.querySelectorAll('button.copy-button');
+            var urlsToCopy = Array.from(allButtons).map(button => button.getAttribute('data-url')).join('\n');
+            copyToClipboard(urlsToCopy);
+        }
+    </script>
+
+</body>
+</html>
